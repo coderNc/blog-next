@@ -1,0 +1,77 @@
+// schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  User
+  Admin
+}
+
+enum BlogStatus {
+  Draft
+  Published
+}
+
+enum VisitType {
+  Page
+  Blog
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  email     String   @unique
+  password  String
+  role      Role     @default(User)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  blogs     Blog[]
+}
+
+model Blog {
+  id          Int        @id @default(autoincrement())
+  title       String
+  content     String     @db.Text
+  author      User       @relation(fields: [authorId], references: [id])
+  authorId    Int
+  status      BlogStatus @default(Draft)
+  publishedAt DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  deletedAt   DateTime?
+  tags        BlogTag[]
+
+  Visit Visit[]
+}
+
+model Tag {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  blogs     BlogTag[]
+}
+
+model BlogTag {
+  blog    Blog @relation(fields: [blogId], references: [id])
+  tag     Tag  @relation(fields: [tagId], references: [id])
+  blogId  Int
+  tagId   Int
+  @@id([blogId, tagId])
+}
+
+model Visit {
+  id        Int       @id @default(autoincrement())
+  type      VisitType
+  blog      Blog?     @relation(fields: [blogId], references: [id])
+  blogId    Int?
+  ip        String?
+  userAgent String?
+  createdAt DateTime  @default(now())
+}
