@@ -3,8 +3,6 @@ import prisma from "@/src/lib/db";
 import { errorResponse, PaginatedResponse, successResponse } from "@/src/utils/network";
 
 export async function GET(request: Request) {
-  console.log("USER GET", request);
-
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
   try {
@@ -65,8 +63,6 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  console.log("USER POST", request);
-
   const { username, email, id, password } = await request.json();
   try {
     const errors: string[] = [];

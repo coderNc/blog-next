@@ -18,7 +18,7 @@ export async function POST(request: Request) {
 
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      return Response.json(errorResponse(['密码错误']), { status: 401 });
+      return Response.json(errorResponse(['用户名或密码错误']), { status: 401 });
     }
 
     const token = jwt.sign(
