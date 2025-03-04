@@ -1,4 +1,5 @@
 // 统一响应格式
+import { ErrorCodeType, ERROR_CODES } from './errorCodes';
 export interface ApiResponse<T> {
   data: T | null
   code: number
@@ -22,9 +23,16 @@ export const successResponse = <T>(data: T, code: number = 200): ApiResponse<T> 
   code,
 })
 
-// 错误响应
-export const errorResponse = (errors: string[], code: number = 500): ApiResponse<null> => ({
-  data: null,
-  code,
-  errors,
-})
+export const errorResponse = (
+  codes: ErrorCodeType[],
+  status?: number
+): ApiResponse<null> => {
+  const firstCode = codes[0];
+  const errorInfo = ERROR_CODES[firstCode] || ERROR_CODES.SERVER_001;
+  
+  return {
+    data: null,
+    code: status || errorInfo.status,
+    errors: codes.map(code => ERROR_CODES[code]?.message || ERROR_CODES.SERVER_001.message)
+  };
+};

@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import prisma from "@/src/lib/db";
 import { errorResponse, PaginatedResponse, successResponse } from "@/src/utils/network";
-
+import { ERROR_CODES } from "@/src/utils/errorCodes";
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
@@ -20,7 +20,7 @@ export async function GET(request: Request) {
         },
       });
       if (!user) {
-        return Response.json({ error: "User not found" }, { status: 404 });
+        return Response.json(errorResponse([ERROR_CODES.AUTH_003.code]), { status: 404 });
       }
       return Response.json(successResponse(user));
     } else {
@@ -55,8 +55,9 @@ export async function GET(request: Request) {
     );
     }
   } catch (error) {
+    console.error(error);
     return Response.json(
-      errorResponse(["Failed to create/query user", error + ""], 500),
+      errorResponse([ERROR_CODES.SERVER_001.code]),
       { status: 500 }
     );
   }
@@ -66,9 +67,9 @@ export async function POST(request: Request) {
   const { username, email, id, password } = await request.json();
   try {
     const errors: string[] = [];
-    if (!username) errors.push("Username is required");
-    if (!email) errors.push("Email is required");
-    if (!password) errors.push("Password is required");
+    if (!username) errors.push(ERROR_CODES.VALIDATION_001.code);
+    if (!email) errors.push(ERROR_CODES.VALIDATION_002.code);
+    if (!password) errors.push(ERROR_CODES.VALIDATION_003.code);
     if (errors.length) {
       return Response.json(errorResponse(errors, 400), { status: 400 });
     }
@@ -111,8 +112,9 @@ export async function POST(request: Request) {
       return Response.json(successResponse(user));
     }
   } catch (error) {
+    console.error(error);
     return Response.json(
-      errorResponse(["Failed to create/update user", error + ""], 500),
+      errorResponse([ERROR_CODES.SERVER_001.code]),
       { status: 500 }
     );
   }

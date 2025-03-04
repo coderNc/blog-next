@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 import prisma from '@/src/lib/db';
 import { errorResponse, successResponse } from '@/src/utils/network';
 import jwt from 'jsonwebtoken';
-
+import { ERROR_CODES } from '@/src/utils/errorCodes';
 export async function POST(request: Request) {
   const { email, password } = await request.json();
   
@@ -13,12 +13,12 @@ export async function POST(request: Request) {
     });
 
     if (!user) {
-      return Response.json(errorResponse(['用户不存在']), { status: 401 });
+      return Response.json(errorResponse([ERROR_CODES.AUTH_003.code]), { status: 401 });
     }
 
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      return Response.json(errorResponse(['用户名或密码错误']), { status: 401 });
+      return Response.json(errorResponse([ERROR_CODES.AUTH_004.code]), { status: 401 });
     }
 
     const token = jwt.sign(
@@ -32,8 +32,9 @@ export async function POST(request: Request) {
       expiresIn: 3600
     }));
   } catch (error) {
+    console.error(error);
     return Response.json(
-      errorResponse(['登录失败', error + ''], 500),
+      errorResponse([ERROR_CODES.SERVER_001.code]),
       { status: 500 }
     );
   }

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
 import { errorResponse } from '@/src/utils/network';
+import { ERROR_CODES } from '@/src/utils/errorCodes';
 
 interface DecodedToken {
   userId: string;
@@ -19,7 +20,7 @@ export async function middleware(request: NextRequest) {
   const token = request.headers.get('authorization')?.split(' ')[1];
   
   if (!token) {
-    return NextResponse.json(errorResponse(['未经授权的访问'], 401));
+    return NextResponse.json(errorResponse([ERROR_CODES.AUTH_001.code]));
   }
 
   try {
@@ -35,7 +36,7 @@ export async function middleware(request: NextRequest) {
     return response;
 } catch (error) {
     console.error(error);
-    return NextResponse.json(errorResponse(['无效的访问令牌'], 401));
+    return NextResponse.json(errorResponse([ERROR_CODES.AUTH_002.code]));
 }
 }
 
